@@ -1,0 +1,309 @@
+All API calls except "api/user/register" and "api/token" require the Jwt Bearer token in request headers.
+example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak"
+
+And Return with new token in the response headers with key "NewToken".
+
+Above token with can be generated for the first time by calling "api/token" in standard format as shown in the following documentation.
+All token have 1 day lifetime.
+
+If more security is desired, all sensitive parameters in the request can be encrypted with function written in "Util/GlobalFunction.cs" in the project folder and add decryption when reading the pamameters.
+
+If failed, All API calls return in the following format:
+{
+    "status": "fail",
+    "message": "Something Not Found..."
+}
+
+For photo uploading and viewing
+POST >> http://localhost:5001/api/fileservice/upload/temp 
+##Upload the photo to this api and it will return random generated string for the parameter "Image" to be included in the creating and editing vouchers.
+
+GET >> http://localhost:5001/api/fileservice/evoucherphoto/{{purchaseid}}
+##purchase id is from getting evoucher and purchase apis
+
+
+POST >> http://localhost:5001/api/user/register
+Body:
+{
+    "PhoneNumber": "09951843803",
+    "Name": "Yinko",
+    "Password": "1234"
+}
+Return:
+{
+    "status": "success",
+    "data": true
+}
+
+POST >> http://localhost:5001/api/token
+Body
+{
+    "PhoneNumber":"09451453074", //Encrytion can be enabled for more security
+    "Password":"abc"
+}
+Return:
+{
+    "status": "success",
+    "data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+        "expires_in_seconds": 86400,
+        "name": "AMK"
+    }
+}
+
+GET >> http://localhost:5001/api/estore/buytypes
+Return:
+{
+    "status": "success",
+    "data": [
+        {
+            "Id": 1,
+            "Name": "Self"
+        },
+        {
+            "Id": 2,
+            "Name": "Gift"
+        }
+    ]
+}
+
+GET >> http://localhost:5001/api/estore/paymentmethods
+Return:
+{
+    "status": "success",
+    "data": [
+        {
+            "Id": 1,
+            "PaymentName": "VISA",
+            "Discount": 10.0
+        },
+        {
+            "Id": 2,
+            "PaymentName": "MASTERCARD",
+            "Discount": 15.0
+        }
+    ]
+}
+
+POST >> http://localhost:5001/api/cms/verifyphone
+Body:
+{
+    "PhoneNumber": "0995184380"
+}
+Return:
+{
+    "status": "success",
+    "data": {
+        "UserName": "Yinko"
+    }
+}
+
+POST >> http://localhost:5001/api/cms/purchasevoucher
+Body:
+{
+    "Title": "NEW",
+    "Description": "Just CREATE",
+    "GiftUserPhone": "09951843803", //only if buytypeid ==2
+    "Image": "", //guid random number from uploading image
+    "BuyTypeId": 2,
+    "Quantity": 2,
+    "PaymentId": 1,
+    "Amount": 100
+}
+Return
+{
+    "status": "success",
+    "data": {
+        "PurchaseId": 3
+    }
+}
+
+PUT >> http://localhost:5001/api/cms/editpurchase
+Body:
+{
+    "Id": 1,
+    "Title": "Edit Purchase",
+    "Description": "Just Edit Again",
+    "GiftUserPhone": "",
+    "Image": "", //guid random number from uploading image
+    "BuyTypeId": 1,
+    "Quantity": 3,
+    "PaymentId": 1,
+    "Amount": 100
+}
+Return:
+{
+    "status": "success",
+    "data": {
+        "PurchaseId": 5
+    }
+}
+
+POST >> http://localhost:5001/api/cms/makepayment
+Body:
+{
+    "PurchaseId": 3,
+    "CardNumber": "4529461318724869",
+    "ExpiryDate" : "09/2023",
+    "CVV" : "515"
+}
+Return:
+{
+    "status": "success",
+    "data": true
+}
+
+GET >> http://localhost:5001/api/estore/purchasehistory
+Return:
+{
+    "status": "success",
+    "data": [
+        {
+            "PurchaseId": 2,
+            "Title": "NEW",
+            "Description": "Just CREATE",
+            "PurchasedDate": "2021-08-29T11:30:10",
+            "BuyType": "Self",
+            "GiftTo": null,
+            "Quantity": 2,
+            "Payment": "VISA",
+            "Amount": 100.0,
+            "Discount": 10.0,
+            "Cost": 180.0,
+            "IsPaid": true
+        },
+        {
+            "PurchaseId": 1,
+            "Title": "Edit Purchase",
+            "Description": "Just Edit Again",
+            "PurchasedDate": "2021-08-29T11:16:00",
+            "BuyType": "Self",
+            "GiftTo": "09951843803",
+            "Quantity": 3,
+            "Payment": "VISA",
+            "Amount": 100.0,
+            "Discount": 10.0,
+            "Cost": 270.0,
+            "IsPaid": true
+        }
+    ]
+}
+
+GET >> http://localhost:5001/api/estore/voucherlistbypurchase/{{id}}
+Return:
+{
+    "status": "success",
+    "data": {
+        "UnusedVouchers": [
+            {
+                "VoucherId": 4,
+                "Title": "Editing",
+                "Description": "hola",
+                "EligiblePhone": "09451453074",
+                "CreatedDate": "2021-08-29T11:30:41",
+                "ExpiryDate": "2021-09-29T11:30:41",
+                "Amount": 100.0,
+                "PromoCode": "95xx7s963IN",
+                "QrCode": "95xx7s963IN",
+                "Isused": false
+            }
+        ],
+        "UsedVouchers": [
+            {
+                "VoucherId": 5,
+                "Title": "NEW",
+                "Description": "Just CREATE",
+                "EligiblePhone": "09451453074",
+                "CreatedDate": "2021-08-29T11:30:41",
+                "ExpiryDate": "2021-09-29T11:30:41",
+                "Amount": 100.0,
+                "PromoCode": "029lfI752XU",
+                "QrCode": "029lfI752XU",
+                "Isused": false
+            }
+       ]
+    }
+}
+
+GET >> http://localhost:5001/api/estore/evoucherlist
+Return:
+{
+    "status": "success",
+    "data": [
+        {
+            "Id": 4,
+            "Title": "Editing",
+            "Description": "hola",
+            "UserId": 1,
+            "ExpiryDate": "2021-09-29T11:30:41",
+            "CreatedDate": "2021-08-29T11:30:41",
+            "Amount": 100.0,
+            "PromoCode": "95xx7s963IN",
+            "QrCode": "95xx7s963IN",
+            "Isactive": true,
+            "Isused": false,
+            "PurchaseId": 2
+        },
+        {
+            "Id": 5,
+            "Title": "NEW",
+            "Description": "Just CREATE",
+            "UserId": 1,
+            "ExpiryDate": "2021-09-29T11:30:41",
+            "CreatedDate": "2021-08-29T11:30:41",
+            "Amount": 100.0,
+            "PromoCode": "029lfI752XU",
+            "QrCode": "029lfI752XU",
+            "Isactive": true,
+            "Isused": false,
+            "PurchaseId": 2
+        }
+    ]
+}
+
+GET >> http://localhost:5001/api/estore/evoucher/{{id}}
+Return:
+{
+    "status": "success",
+    "data": {
+        "Id": 4,
+        "Title": "Editing",
+        "Description": "hola",
+        "UserId": 1,
+        "ExpiryDate": "2021-09-29T11:30:41",
+        "CreatedDate": "2021-08-29T11:30:41",
+        "Amount": 100.0,
+        "PromoCode": "95xx7s963IN",
+        "QrCode": "95xx7s963IN",
+        "Isactive": true,
+        "Isused": false,
+        "PurchaseId": 2
+    }
+}
+
+PUT >> http://localhost:5001/api/cms/editvoucher
+Body:
+{
+    "VoucherId": 4,
+    "Title": "Editing",
+    "Description": "hola",
+    "Image": "",
+    "Isactive": true
+}
+Return:
+{
+    "status": "success",
+    "data": true
+}
+
+POST >> http://localhost:5001/api/estore/verifypromo
+Body:
+{
+    "PromoCode": "95xx7s963IN"
+}
+Return:
+{
+    "status": "success",
+    "data": true
+}
+

@@ -1,0 +1,496 @@
+{
+	"info": {
+		"_postman_id": "d0f78462-3290-4898-8833-c12c93645b77",
+		"name": "eVoucher",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PhoneNumber\": \"09951843803\",\r\n    \"Name\": \"Yinko\",\r\n    \"Password\": \"1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/user/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"user",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Login Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PhoneNumber\":\"09451453074\", //Encrytion enabled for 09451453074 and password abc\r\n    \"Password\":\"abc\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get BuyTypes",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAzOjEwOjQ4IFBNIiwic3ViIjoiQU1LIiwianRpIjoiYzZkOTExYzMtYWZjOC00ZTljLWE2MTEtYTc5N2U2NTA4NDZjIiwiaWF0IjoxNjMwMjQ5ODQ4LCJuYmYiOjE2MzAyNDk4NDgsImV4cCI6MTYzMDMzNjI0OCwiaXNzIjoiRVZPVUNIRVJURVNUSU5HIiwiYXVkIjoiVXNlcnMifQ.JKTnRYi-xz0EspY97633A8umg4epFp6EPlL9zlUKyx8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/estore/buytypes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"buytypes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Payment Methods",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/estore/paymentmethods",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"paymentmethods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify PhoneNumber For Gift",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAzOjA0OjQ5IFBNIiwic3ViIjoiQU1LIiwianRpIjoiOTJmMDNmMjEtNWQyYS00ZmNjLWE3NDAtMjRkMzI0OGE5YjQ3IiwiaWF0IjoxNjMwMjM1Mjc2LCJuYmYiOjE2MzAyNDk0ODksImV4cCI6MTYzMDMzNTg4OSwiaXNzIjoiRVZPVUNIRVJURVNUSU5HIiwiYXVkIjoiVXNlcnMifQ.Uk98PwYm8LMJAsLo0YyxBmB6mQEqnswYCoU1vGtQRpg",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PhoneNumber\": \"0995184380\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/cms/verifyphone",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"cms",
+						"verifyphone"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Purchase eVoucher",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Title\": \"NEW\",\r\n    \"Description\": \"Just CREATE\",\r\n    \"GiftUserPhone\": \"09951843803\", //only if buytypeid ==2\r\n    \"Image\": \"\", //guid random number from uploading image\r\n    \"BuyTypeId\": 2,\r\n    \"Quantity\": 2,\r\n    \"PaymentId\": 1,\r\n    \"Amount\": 100\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/cms/purchasevoucher",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"cms",
+						"purchasevoucher"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit Purchase",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Id\": 1,\r\n    \"Title\": \"Edit Purchase\",\r\n    \"Description\": \"Just Edit Again\",\r\n    \"GiftUserPhone\": \"\",\r\n    \"Image\": \"\", //guid random number from uploading image\r\n    \"BuyTypeId\": 1,\r\n    \"Quantity\": 3,\r\n    \"PaymentId\": 1,\r\n    \"Amount\": 100\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/cms/editpurchase",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"cms",
+						"editpurchase"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Make Payment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PurchaseId\": 3,\r\n    \"CardNumber\": \"4529461318724869\",\r\n    \"ExpiryDate\" : \"09/2023\",\r\n    \"CVV\" : \"515\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/cms/makepayment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"cms",
+						"makepayment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Purchase History",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAzOjA0OjQ5IFBNIiwic3ViIjoiQU1LIiwianRpIjoiOTJmMDNmMjEtNWQyYS00ZmNjLWE3NDAtMjRkMzI0OGE5YjQ3IiwiaWF0IjoxNjMwMjM1Mjc2LCJuYmYiOjE2MzAyNDk0ODksImV4cCI6MTYzMDMzNTg4OSwiaXNzIjoiRVZPVUNIRVJURVNUSU5HIiwiYXVkIjoiVXNlcnMifQ.Uk98PwYm8LMJAsLo0YyxBmB6mQEqnswYCoU1vGtQRpg",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/estore/purchasehistory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"purchasehistory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Vouchers By Purchase",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/estore/voucherlistbypurchase/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"voucherlistbypurchase",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get EvoucherList",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/estore/evoucherlist",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"evoucherlist"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Evoucher By Id",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/estore/evoucher/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"evoucher",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit Voucher",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"VoucherId\": 1,\r\n    \"Title\": \"Editing\",\r\n    \"Description\": \"hola\",\r\n    \"Image\": \"\",\r\n    \"Isactive\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/cms/editvoucher",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"cms",
+						"editvoucher"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Promocode",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2V0RXhwaXJlRGF0ZSI6IjgvMzAvMjAyMSAxMTowNzo1NiBBTSIsInN1YiI6IkFNSyIsImp0aSI6IjkyZjAzZjIxLTVkMmEtNGZjYy1hNzQwLTI0ZDMyNDhhOWI0NyIsImlhdCI6MTYzMDIzNTI3NiwibmJmIjoxNjMwMjM1Mjc2LCJleHAiOjE2MzAzMjE2NzYsImlzcyI6IkVWT1VDSEVSVEVTVElORyIsImF1ZCI6IlVzZXJzIn0.5hWhoCNou1wQ1wGh4wJITUYLwqdFk9dYmc_zVwnyoak",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PromoCode\": \"95xx7s963IN\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/estore/verifypromo",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"estore",
+						"verifypromo"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
