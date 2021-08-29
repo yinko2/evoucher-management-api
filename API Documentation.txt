@@ -3,8 +3,9 @@ example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOiIxIiwiVGlja2
 
 And Return with new token in the response headers with key "NewToken".
 
-Above token with can be generated for the first time by calling "api/token" in standard format as shown in the following documentation.
-All token have 1 day lifetime.
+Above token can be generated for the first time by calling "api/token" in standard format as shown in the following documentation.
+All token have 1 day lifetime, which can be modified in appsettings.json
+API port number can be edited in hosting.json
 
 If more security is desired, all sensitive parameters in the request can be encrypted with function written in "Util/GlobalFunction.cs" in the project folder and add decryption when reading the pamameters.
 
