@@ -13,13 +13,8 @@ namespace eVoucherAPI.Controllers
     [ApiController]
     public class EstoreController : BaseController
     {
-        private readonly IRepositoryWrapper _repositoryWrapper;
-        private IConfiguration _configuration;
-
-        public EstoreController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration)
+        public EstoreController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration) : base(repositoryWrapper, configuration)
         {
-            _repositoryWrapper = repositoryWrapper;
-            _configuration = configuration;
         }
 
         [HttpGet("evoucherlist")]
@@ -32,7 +27,7 @@ namespace eVoucherAPI.Controllers
                 return Ok(new { status = "success", data = elist });
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("get evouchers fail", ex.Message, "Estore >> getEvouchers");
+                await _repositoryWrapper.EventLog.Error("get evouchers fail", ex.Message, "Estore >> getEvouchers");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -51,35 +46,7 @@ namespace eVoucherAPI.Controllers
                 return Ok(new { status = "success", data = obj });
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("get evoucher by id fail", ex.Message, "Estore >> GetEvoucherbyId");
-                return BadRequest(new { status = "fail", message = "Something went wrong." });
-            }
-        }
-
-        [HttpGet("paymentmethods")]
-        public async Task<dynamic> getpaymentmethods()
-        {
-            try
-            {
-                var plist = await _repositoryWrapper.Payment.FindAllAsync();
-                return Ok(new { status = "success", data = plist });
-            }
-            catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("get payments fail", ex.Message, "Estore >> getpaymentmethods");
-                return BadRequest(new { status = "fail", message = "Something went wrong." });
-            }
-        }
-
-        [HttpGet("buytypes")]
-        public async Task<dynamic> GetBuyTypes()
-        {
-            try
-            {
-                var list = await _repositoryWrapper.BuyType.FindAllAsync();
-                return Ok(new { status = "success", data = list });
-            }
-            catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("get GetBuyTypes fail", ex.Message, "Estore >> GetBuyTypes");
+                await _repositoryWrapper.EventLog.Error("get evoucher by id fail", ex.Message, "Estore >> GetEvoucherbyId");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -113,7 +80,7 @@ namespace eVoucherAPI.Controllers
                 }
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("Verify PromoCode fail", ex.Message, "CMS >> VerifyPromoCode");
+                await _repositoryWrapper.EventLog.Error("Verify PromoCode fail", ex.Message, "CMS >> VerifyPromoCode");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -129,7 +96,7 @@ namespace eVoucherAPI.Controllers
                 return Ok(new { status = "success", data = obj });
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("Get PurchaseHistory fail", ex.Message, "Estore >> GetPurchaseHistory");
+                await _repositoryWrapper.EventLog.Error("Get PurchaseHistory fail", ex.Message, "Estore >> GetPurchaseHistory");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -151,7 +118,7 @@ namespace eVoucherAPI.Controllers
                 return Ok(new { status = "success", data = new { UnusedVouchers = Unused, UsedVouchers = Used }});
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("Get VoucherList By Purchase fail", ex.Message, "Estore >> GetVoucherListByPurchase");
+                await _repositoryWrapper.EventLog.Error("Get VoucherList By Purchase fail", ex.Message, "Estore >> GetVoucherListByPurchase");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }

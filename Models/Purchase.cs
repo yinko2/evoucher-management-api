@@ -8,10 +8,6 @@ using Microsoft.EntityFrameworkCore;
 namespace eVoucherAPI.Models
 {
     [Table("tbl_purchases")]
-    [Index(nameof(BuyTypeId), Name = "buy_type_id")]
-    [Index(nameof(GiftUserId), Name = "gift_user_id")]
-    [Index(nameof(PaymentId), Name = "payment_id")]
-    [Index(nameof(UserId), Name = "tbl_purchases_ibfk_3")]
     public partial class Purchase
     {
         [Key]
@@ -59,7 +55,7 @@ namespace eVoucherAPI.Models
         [Column("cost")]
         public double? Cost { get; set; }
 
-        [Column("ispaid")]
+        [Column("is_paid")]
         public bool IsPaid { get; set; }
 
         [NotMapped]

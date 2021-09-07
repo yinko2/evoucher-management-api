@@ -18,9 +18,9 @@ namespace eVoucherAPI.Extensions
             var corsBuilder = new CorsPolicyBuilder();
             corsBuilder.AllowAnyHeader();
             corsBuilder.AllowAnyMethod();
-            //corsBuilder.AllowAnyOrigin(); // For anyone access.
-            corsBuilder.WithOrigins("http://localhost:4200","http://localhost"); // for a specific url. Don't add a forward slash on the end!
-            corsBuilder.AllowCredentials();
+            corsBuilder.AllowAnyOrigin(); // For anyone access.
+            // corsBuilder.WithOrigins("http://localhost:4200","http://localhost"); // for a specific url. Don't add a forward slash on the end!
+            // corsBuilder.AllowCredentials();
 
             services.AddCors(options =>
             {

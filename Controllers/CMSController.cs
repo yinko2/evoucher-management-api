@@ -13,50 +13,9 @@ namespace eVoucherAPI.Controllers
     [ApiController]
     public class CMSController : BaseController
     {
-        private readonly IRepositoryWrapper _repositoryWrapper;
-        private IConfiguration _configuration;
-
-        public CMSController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration)
+        public CMSController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration) : base(repositoryWrapper, configuration)
         {
-            _repositoryWrapper = repositoryWrapper;
-            _configuration = configuration;
         }
-
-        // [HttpGet("checkPurchaseCount")]
-        // public async Task<dynamic> checkPurchaseCount()
-        // {
-        //     try
-        //     {
-        //         int userId = int.Parse(_tokenData.UserID);
-        //         User obj = await _repositoryWrapper.User.FindByIDAsync(userId);
-        //         string purchaseLimit = _configuration.GetSection("appSettings:purchaseLimit").Value;
-        //         if (obj.BuyCount > Convert.ToInt32(purchaseLimit))
-        //             return Ok(new { status = "success", data = true});
-        //         return Ok(new { status = "success", data = false} );
-        //     }
-        //     catch (Exception ex) {
-        //         _repositoryWrapper.EventLog.Error("Add purchase fail", ex.Message, "CMS >> checkPurchaseCount");
-        //         return BadRequest(new { status = "fail", message = "Something went wrong." });
-        //     }
-        // }
-
-        // [HttpGet("checkGiftCount")]
-        // public async Task<dynamic> checkGiftCount()
-        // {
-        //     try
-        //     {
-        //         int userId = int.Parse(_tokenData.UserID);
-        //         User obj = await _repositoryWrapper.User.FindByIDAsync(userId);
-        //         string giftLimit = _configuration.GetSection("appSettings:giftLimit").Value;
-        //         if (obj.GiftCount > Convert.ToInt32(giftLimit))
-        //             return Ok(new { status = "success", data = true});
-        //         return Ok(new { status = "success", data = false} );
-        //     }
-        //     catch (Exception ex) {
-        //         _repositoryWrapper.EventLog.Error("Add purchase fail", ex.Message, "CMS >> checkGiftCount");
-        //         return BadRequest(new { status = "fail", message = "Something went wrong." });
-        //     }
-        // }
 
         [HttpPost("verifyphone")]
         public async Task<dynamic> VerifyPhoneForGift([FromBody] Newtonsoft.Json.Linq.JObject param)
@@ -71,7 +30,7 @@ namespace eVoucherAPI.Controllers
                 return BadRequest(new { status = "fail", message = "User With PhoneNo: "+ phoneno + " Not Found"} );
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("Add purchase fail", ex.Message, "CMS >> VerifyPhoneForGift");
+                await _repositoryWrapper.EventLog.Error("Add purchase fail", ex.Message, "CMS >> VerifyPhoneForGift");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -98,7 +57,7 @@ namespace eVoucherAPI.Controllers
                     int gid = await _repositoryWrapper.User.GetUserIdByPhone(obj.GiftUserPhone);
                     if (gid == 0)
                     {
-                        _repositoryWrapper.EventLog.Error("Gift User with PhoneNo: "+ obj.GiftUserPhone +" Not Found", "", "CMS >> PurchaseEVoucher");
+                        await _repositoryWrapper.EventLog.Error("Gift User with PhoneNo: "+ obj.GiftUserPhone +" Not Found", "", "CMS >> PurchaseEVoucher");
                         return BadRequest(new { status = "fail", message = "Gift User Not Found." });
                     }
                     else if (gid == userId)
@@ -107,7 +66,7 @@ namespace eVoucherAPI.Controllers
                     }
                     else if(userobj.GiftCount >= Convert.ToInt32(giftLimit) || userobj.GiftCount + obj.Quantity > Convert.ToInt32(giftLimit))
                     {
-                        _repositoryWrapper.EventLog.Error("Gift Limit Reached with PhoneNo: "+ obj.GiftUserPhone, "", "CMS >> PurchaseEVoucher");
+                        await _repositoryWrapper.EventLog.Error("Gift Limit Reached with PhoneNo: "+ obj.GiftUserPhone, "", "CMS >> PurchaseEVoucher");
                         return BadRequest(new { status = "fail", message = "Gift Limit Reached" });
                     }
                     obj.GiftUserId = gid;
@@ -116,7 +75,7 @@ namespace eVoucherAPI.Controllers
                 {
                     if (userobj.BuyCount >= Convert.ToInt32(purchaseLimit) || userobj.BuyCount + obj.Quantity > Convert.ToInt32(purchaseLimit))
                     {
-                        _repositoryWrapper.EventLog.Error("Purchase Limit Reached with PhoneNo: "+ userobj.PhoneNumber, "", "CMS >> PurchaseEVoucher");
+                        await _repositoryWrapper.EventLog.Error("Purchase Limit Reached with PhoneNo: "+ userobj.PhoneNumber, "", "CMS >> PurchaseEVoucher");
                         return BadRequest(new { status = "fail", message = "Purchase Limit Reached" });
                     }
                 }
@@ -128,23 +87,23 @@ namespace eVoucherAPI.Controllers
                 obj.Cost = total - (total * (dc/100));
                 Validator.ValidateObject(obj, new ValidationContext(obj), true);
                 await _repositoryWrapper.Purchase.CreateAsync(obj, true);
-                _repositoryWrapper.EventLog.Insert(obj, "CMS >> PurchaseEVoucher");
+                await _repositoryWrapper.EventLog.Insert(obj, "CMS >> PurchaseEVoucher");
 
                 if (!string.IsNullOrEmpty(obj.Image))
                 {
                     FileService.MoveTempFile("eVoucherPhoto", obj.Id.ToString(), obj.Image, _configuration);
-                    _repositoryWrapper.EventLog.Info("Save eVoucher Photo: " + obj.Id.ToString(), "CMS >> PurchaseEVoucher");
+                    await _repositoryWrapper.EventLog.Info("Save eVoucher Photo: " + obj.Id.ToString(), "CMS >> PurchaseEVoucher");
                 }
 
                 return Created("", new { status = "success", data = new { PurchaseId = obj.Id } });
             }
             catch (ValidationException vex)
             {
-                _repositoryWrapper.EventLog.Error("Add purchase validation fail", vex.Message, "CMS >> PurchaseEVoucher");
+                await _repositoryWrapper.EventLog.Error("Add purchase validation fail", vex.Message, "CMS >> PurchaseEVoucher");
                 return BadRequest(new { status = "fail", message = vex.ValidationResult.ErrorMessage });
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("Add purchase fail", ex.Message, "CMS >> PurchaseEVoucher");
+                await _repositoryWrapper.EventLog.Error("Add purchase fail", ex.Message, "CMS >> PurchaseEVoucher");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -196,7 +155,7 @@ namespace eVoucherAPI.Controllers
                     int gid = await _repositoryWrapper.User.GetUserIdByPhone(obj.GiftUserPhone);
                     if (gid == 0)
                     {
-                        _repositoryWrapper.EventLog.Error("Gift User with PhoneNo: "+ obj.GiftUserPhone +" Not Found", "", "CMS >> PurchaseEVoucher");
+                        await _repositoryWrapper.EventLog.Error("Gift User with PhoneNo: "+ obj.GiftUserPhone +" Not Found", "", "CMS >> PurchaseEVoucher");
                         return BadRequest(new { status = "fail", message = "Gift User Not Found." });
                     }
                     else if (gid == userId)
@@ -205,7 +164,7 @@ namespace eVoucherAPI.Controllers
                     }
                     else if(userobj.GiftCount >= Convert.ToInt32(giftLimit) || userobj.GiftCount + obj.Quantity > Convert.ToInt32(giftLimit))
                     {
-                        _repositoryWrapper.EventLog.Error("Gift Limit Reached with PhoneNo: "+ obj.GiftUserPhone, "", "CMS >> PurchaseEVoucher");
+                        await _repositoryWrapper.EventLog.Error("Gift Limit Reached with PhoneNo: "+ obj.GiftUserPhone, "", "CMS >> PurchaseEVoucher");
                         return BadRequest(new { status = "fail", message = "Gift Limit Reached" });
                     }
                     existingpur.GiftUserId = gid;
@@ -215,31 +174,31 @@ namespace eVoucherAPI.Controllers
                 {
                     if (userobj.BuyCount >= Convert.ToInt32(purchaseLimit) || userobj.BuyCount + obj.Quantity > Convert.ToInt32(purchaseLimit))
                     {
-                        _repositoryWrapper.EventLog.Error("Purchase Limit Reached with PhoneNo: "+ userobj.PhoneNumber, "", "CMS >> PurchaseEVoucher");
+                        await _repositoryWrapper.EventLog.Error("Purchase Limit Reached with PhoneNo: "+ userobj.PhoneNumber, "", "CMS >> PurchaseEVoucher");
                         return BadRequest(new { status = "fail", message = "Purchase Limit Reached" });
                     }
                     existingpur.GiftUserId = null;
                 }
                 await _repositoryWrapper.Purchase.UpdateAsync(existingpur, true);
-                _repositoryWrapper.EventLog.Update(obj, "CMS >> PurchaseEVoucher");
+                await _repositoryWrapper.EventLog.Update(obj, "CMS >> PurchaseEVoucher");
 
                 if (!string.IsNullOrEmpty(obj.Image))
                 {
                     FileService.DeleteFileNameOnly("eVoucherPhoto", existingpur.Id.ToString(), _configuration);
                     FileService.MoveTempFile("eVoucherPhoto", existingpur.Id.ToString(), obj.Image.ToString(), _configuration);
-                    _repositoryWrapper.EventLog.Info("Save evoucher Photo: " + obj.Id.ToString(), "CMS >> EditPurchase");
+                    await _repositoryWrapper.EventLog.Info("Save evoucher Photo: " + obj.Id.ToString(), "CMS >> EditPurchase");
                 }
 
                 return Ok(new { status = "success", data = new { PurchaseId = obj.Id } });
             }
             catch (ValidationException vex)
             {
-                _repositoryWrapper.EventLog.Error("Edit purchase validation fail", vex.Message, "CMS >> EditPurchase");
+                await _repositoryWrapper.EventLog.Error("Edit purchase validation fail", vex.Message, "CMS >> EditPurchase");
                 return BadRequest(new { status = "fail", message = vex.ValidationResult.ErrorMessage });
             }
             catch (Exception ex) 
             {
-                _repositoryWrapper.EventLog.Error("Edit purchase fail", ex.Message, "CMS >> EditVoucher");
+                await _repositoryWrapper.EventLog.Error("Edit purchase fail", ex.Message, "CMS >> EditVoucher");
                 return BadRequest(new { status = "fail", message = ex.Message });
             }
         }
@@ -285,7 +244,7 @@ namespace eVoucherAPI.Controllers
                 }
                 purobj.IsPaid = true;
                 await _repositoryWrapper.Purchase.UpdateAsync(purobj, true);
-                _repositoryWrapper.EventLog.Update(purobj, "Estore >> MakePayment");
+                await _repositoryWrapper.EventLog.Update(purobj, "Estore >> MakePayment");
 
                 //Create eVouchers
                 for(int i = 0; i < purobj.Quantity; i++)
@@ -311,7 +270,7 @@ namespace eVoucherAPI.Controllers
                         PurchaseId = purobj.Id
                     };
                     await _repositoryWrapper.Evoucher.CreateAsync(newobj, true);
-                    _repositoryWrapper.EventLog.Insert(newobj, "Evoucher >> MakePayment >> CreateEVoucher");
+                    await _repositoryWrapper.EventLog.Insert(newobj, "Evoucher >> MakePayment >> CreateEVoucher");
                 }
 
                 //update user purchase and gift limit
@@ -325,11 +284,11 @@ namespace eVoucherAPI.Controllers
                     userobj.BuyCount += purobj.Quantity;
                 }
                 await _repositoryWrapper.User.UpdateAsync(userobj, true);
-                _repositoryWrapper.EventLog.Update(userobj, "Evoucher >> MakePayment >> UpdateUser");
+                await _repositoryWrapper.EventLog.Update(userobj, "Evoucher >> MakePayment >> UpdateUser");
                 return Ok(new { status = "success", data = true });
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("MakePayment Failed", ex.Message, "Estore >> MakePayment");
+                await _repositoryWrapper.EventLog.Error("MakePayment Failed", ex.Message, "Estore >> MakePayment");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }
@@ -366,19 +325,19 @@ namespace eVoucherAPI.Controllers
                 obj.Isactive = isactive;
 
                 await _repositoryWrapper.Evoucher.UpdateAsync(obj, true);
-                _repositoryWrapper.EventLog.Update(obj, "CMS >> EditVoucher");
+                await _repositoryWrapper.EventLog.Update(obj, "CMS >> EditVoucher");
 
                 if (!string.IsNullOrEmpty(image))
                 {
                     FileService.DeleteFileNameOnly("eVoucherPhoto", obj.PurchaseId.ToString(), _configuration);
                     FileService.MoveTempFile("eVoucherPhoto", obj.PurchaseId.ToString(), image, _configuration);
-                    _repositoryWrapper.EventLog.Info("Save evoucher Photo: " + obj.Id.ToString(), "CMS >> EditVoucher");
+                    await _repositoryWrapper.EventLog.Info("Save evoucher Photo: " + obj.Id.ToString(), "CMS >> EditVoucher");
                 }
 
                 return Ok(new { status = "success", data = true });
             }
             catch (Exception ex) {
-                _repositoryWrapper.EventLog.Error("get evoucher by id fail", ex.Message, "CMS >> EditVoucher");
+                await _repositoryWrapper.EventLog.Error("get evoucher by id fail", ex.Message, "CMS >> EditVoucher");
                 return BadRequest(new { status = "fail", message = "Something went wrong." });
             }
         }

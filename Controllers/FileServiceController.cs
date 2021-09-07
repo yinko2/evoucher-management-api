@@ -11,12 +11,8 @@ namespace eVoucherAPI.Controllers
     [Route("api/[controller]")]
     public class FileServiceController : BaseController
     {
-        private IRepositoryWrapper _repositoryWrapper;
-        private IConfiguration _configuration;
-        public FileServiceController(IRepositoryWrapper RW, IConfiguration configuration)
+        public FileServiceController(IRepositoryWrapper repositoryWrapper, IConfiguration configuration) : base(repositoryWrapper, configuration)
         {
-            _repositoryWrapper = RW;
-            _configuration = configuration;
         }
 
         [HttpGet("evoucherphoto/{name}", Name = "evoucherphoto")]

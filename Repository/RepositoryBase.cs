@@ -78,8 +78,7 @@ namespace eVoucherAPI.Repository
         }
 
         public void Create(dynamic entity, bool flush = true)
-        {
-            //entity.SetEventLogMessage(this.SetOldObjectToString(entity)); //it is not necessary for create record, there is no old record in create. 
+        { 
             this.RepositoryContext.Set<T>().Add(entity);
             if (flush) this.Save();
         }

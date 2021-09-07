@@ -23,12 +23,11 @@ namespace eVoucherAPI.CustomTokenAuthProvider
         private IHttpContextAccessor _httpContextAccessor;
         private IConfiguration _configuration;
 
-        public TokenProviderMiddleware(IHttpContextAccessor httpContextAccessor, ILoggerFactory DepLoggerFactory, IRepositoryWrapper repository, IConfiguration configuration)
+        public TokenProviderMiddleware(IHttpContextAccessor httpContextAccessor, IRepositoryWrapper repository, IConfiguration configuration)
         {
             _httpContextAccessor = httpContextAccessor;
             _repository = repository;
             _configuration = configuration;
-            var requestPath = _httpContextAccessor.HttpContext.Request.Path.ToString();
             _serializerSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented
@@ -51,11 +50,13 @@ namespace eVoucherAPI.CustomTokenAuthProvider
         {
             TokenData _tokenData = null;
             var access_token = string.Empty;
+
+            //Check Token
             var hdtoken = context.Request.Headers["Authorization"];
             if (hdtoken.Count > 0)
             {
                 access_token = hdtoken[0];
-                access_token = access_token.Replace("Bearer ", string.Empty);
+                access_token = access_token.Replace("Bearer ", string.Empty); //Get Token
                 
                 try
                 {
@@ -65,36 +66,35 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                 }
                 catch (Exception ex)
                 {
-                    _repository.EventLog.AddEventLog(EventLogTypes.Error, "Invalid Token", ex.Message, "Authentication >> CheckToken");
-                    await ResponseMessage(new { status = "fail", message = "Invalid Token" }, context, 401);
+                    //Read Token Error
+                    await _repository.EventLog.Error("Invalid Token", ex.Message, "TokenProviderMiddleware >> InvokeAsync");
+                    await ResponseMessage(new { error = "Invalid Token" }, context, StatusCodes.Status401Unauthorized);
                     return;
                 }
             }
         
             if (context.Request.Path.Equals(_options.Path, StringComparison.Ordinal))
             {
-                await GenerateToken(context, next);
+                await GenerateToken(context); // login with api/token
             }
             else if(context.Request.Path.Equals("/", StringComparison.Ordinal))
             {
-                await next(context);  ///skip default landing page
+                //default landing page
+                await ResponseMessage(new { healthy = true }, context, StatusCodes.Status200OK);
             }
             else
             {
                 string strPath = context.Request.Path.ToString();
-                // if(context.Request.Path.ToString().Split("/").Length > 3) {
-                //     methodName = context.Request.Path.ToString().Split("/")[3];
-                // }
                 
-                // you can add with || multiple public available functions to skip login
-                if (strPath == "/api/user/register")
+                // you can add with || multiple publically available functions to skip login
+                if (strPath.Equals("/api/registration", StringComparison.OrdinalIgnoreCase))
                 {
                     await next(context);
                 }
-
-                if (access_token == "")
+                else if (string.IsNullOrEmpty(access_token))
                 {
-                    await ResponseMessage(new { status = "fail", message = "Token not found" }, context, 401);
+                    await _repository.EventLog.Warning("Token not found", "TokenProviderMiddleware >> InvokeAsync");
+                    await ResponseMessage(new { error = "Token not found" }, context, StatusCodes.Status401Unauthorized);
                 }
                 else
                 {
@@ -102,17 +102,16 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                     string newToken = "";
                     try
                     {
-                        var pathstr = context.Request.Path.ToString();
-                        string[] patharr = pathstr.Split('/');
-
                         // check token expired   
                         double expireTime = Convert.ToDouble(_options.Expiration.TotalMinutes);
                         DateTime issueDate = _tokenData.TicketExpireDate.AddMinutes(-expireTime);
                         DateTime NowDate = DateTime.UtcNow;
                         if (issueDate > NowDate || _tokenData.TicketExpireDate < NowDate)
                         {
-                            newToken = "-2";
-                            throw new Exception("Invalid Token Expire, Issue Date: " + issueDate.ToString());
+                            // throw new Exception("Invalid Token Expire, Issue Date: " + issueDate.ToString());
+                            await _repository.EventLog.Warning("The Token has expired", "TokenProviderMiddleware >> InvokeAsync");
+                            await ResponseMessage(new { error = "The Token has expired" }, context, StatusCodes.Status401Unauthorized);
+                            return;
                         }
                         
                         // end of token expired check
@@ -131,27 +130,25 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                             signingCredentials: _options.SigningCredentials);
                         var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
                         newToken = encodedJwt;
+                        if (!string.IsNullOrEmpty(newToken))
+                        {
+                            context.Response.Headers.Add("Access-Control-Expose-Headers", "NewToken");
+                            context.Response.Headers.Add("NewToken", newToken);
+                            await next(context);
+                        }
                     }
                     catch (Exception ex)
                     {
                         Globalfunction.WriteSystemLog("InvokeAsync: " + ex.Message);
-                    }
-
-                    if (newToken == "-2")
-                    {
-                        await ResponseMessage(new { status = "fail", message = "The Token has expired" }, context, 401);
-                    }
-                    else if (newToken != "")
-                    {
-                        context.Response.Headers.Add("Access-Control-Expose-Headers", "NewToken");
-                        context.Response.Headers.Add("NewToken", newToken);
-                        await next(context);
+                        await _repository.EventLog.Error("New Token Generation Failed", ex.Message, "TokenProviderMiddleware >> InvokeAsync");
+                        await ResponseMessage(new { error = "Something went wrong" }, context, StatusCodes.Status401Unauthorized);
+                        return;
                     }
                 }
             }            
         }
 
-        private async Task GenerateToken(HttpContext context, RequestDelegate next)
+        private async Task GenerateToken(HttpContext context)
         {
             User userData = new User();
             string phoneno = "";
@@ -165,8 +162,8 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                     userData = JsonConvert.DeserializeObject<User>(request_body, _serializerSettings);
                     if (string.IsNullOrEmpty(userData.PhoneNumber) || string.IsNullOrEmpty(userData.Password))
                     {
-                        _repository.EventLog.AddEventLog(EventLogTypes.Error, "Invalid login credentials", "", "Authentication >> GenerateToken");
-                        await ResponseMessage(new { status = "fail", message = "Invalid login credentials" }, context, 400);
+                        await _repository.EventLog.Error("Invalid login credentials", "PhNo:" + userData.PhoneNumber + ", Password: " + userData.Password, "Authentication >> GenerateToken");
+                        await ResponseMessage(new { error = "Invalid login credentials" }, context, StatusCodes.Status422UnprocessableEntity);
                         return;
                     }
                     // phoneno = Encryption.DecryptClient_String(userData.PhoneNumber);
@@ -177,9 +174,9 @@ namespace eVoucherAPI.CustomTokenAuthProvider
             }
             catch (Exception ex)
             {
-                _repository.EventLog.AddEventLog(EventLogTypes.Error, "Failed to read login credentials", ex.Message, "Authentication >> GenerateToken");
+                await _repository.EventLog.Error("Failed to read login credentials", ex.Message, "Authentication >> GenerateToken");
                 Globalfunction.WriteSystemLog("GenerateToken: " + ex.Message);
-                await ResponseMessage(new { status = "fail", message = "Invalid login credentials" }, context, 400);
+                await ResponseMessage(new { error = "Invalid login credentials" }, context, StatusCodes.Status400BadRequest);
                 return;
             }
 
@@ -201,7 +198,7 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                 else 
                 {
                     string error_msg = loginresult.message.ToString();
-                    await ResponseMessage(new { status = "fail", message = error_msg }, context, 400);
+                    await ResponseMessage(new { error = error_msg }, context, StatusCodes.Status401Unauthorized);
                     return;
                 }
 
@@ -234,38 +231,37 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                 {
                     access_token = encodedJwt,
                     expires_in_seconds = (int)_options.Expiration.TotalSeconds,
+                    user_id = UserID,
                     name = UserName
                 };
 
                 var response = new
                 {
-                    status = "success",
                     data = tokeninfo
                 };
                 
-                context.Response.ContentType = "application/json";
-                
-                await context.Response.WriteAsync(JsonConvert.SerializeObject(response, _serializerSettings));
+                await ResponseMessage(response, context, StatusCodes.Status200OK);
                  
-                _repository.EventLog.AddEventLog(EventLogTypes.Info, "Successful login for this account Ph No: " + phoneno, "", "GenerateToken");
+                await _repository.EventLog.Info("Successful login for this account Ph No: " + phoneno, "GenerateToken");
             }
             catch(Exception ex) 
             {
                 Globalfunction.WriteSystemLog("Generate Token Fail: " + phoneno + ", Error: " + ex.Message); 
-                _repository.EventLog.AddEventLog(EventLogTypes.Error, "Generate Token Fail for" + phoneno, ex.Message, "GenerateToken");; 
-                await ResponseMessage(new { status = "fail", message = "Generate Token Fail" }, context, 401);
+                await _repository.EventLog.Error("Generate Token Fail for" + phoneno, ex.Message, "GenerateToken");; 
+                await ResponseMessage(new { error = "Generate Token Fail" }, context, StatusCodes.Status401Unauthorized);
                 return;
             }
         }
 
-        async Task<dynamic> dologinValidation(string phonenumber, string password)
+        private async Task<dynamic> dologinValidation(string phonenumber, string password)
         {
-            try {
+            try 
+            {
                 User result = await _repository.User.GetUserByPhone(phonenumber);
                 if (result == null)
                 {
-                    _repository.EventLog.AddEventLog(EventLogTypes.Error, "User not found with " + phonenumber, "", "doLoginValidation");
-                    return new { error = 1, message = "User not found"};
+                    await _repository.EventLog.Error("User not found with " + phonenumber, "", "TokenProviderMiddleware >> doLoginValidation");
+                    return new { error = 1, message = "User not found with " + phonenumber };
                 }
     
                 string oldhash = result.Password; 
@@ -273,34 +269,30 @@ namespace eVoucherAPI.CustomTokenAuthProvider
                 bool flag = SaltedHash.Verify(oldsalt, oldhash, password);
                 if (flag)
                 {
-                    return new {error = 0, data = result};
+                    return new { error = 0, data = result };
                 }
-                _repository.EventLog.AddEventLog(EventLogTypes.Error, "Password Validation Failed with " + phonenumber, "", "doLoginValidation");
+                await _repository.EventLog.Error("Password Validation Failed with " + phonenumber, "", "TokenProviderMiddleware >> doLoginValidation");
                 return new { error = 1, message = "Password Validation Failed"};
             }
-            catch (ValidationException vex)
+            // catch (ValidationException vex)
+            // {
+            //     Globalfunction.WriteSystemLog("dologinValidation: " + vex.Message);
+            //     await _repository.EventLog.Error("Login Validation Failed with " + phonenumber, vex.Message, "doLoginValidation");
+            //     return new { error = 1, message = "Login Validation Failed"};
+            // }
+            catch(Exception ex) 
             {
-                Globalfunction.WriteSystemLog("dologinValidation: " + vex.Message);
-                _repository.EventLog.AddEventLog(EventLogTypes.Error, "Login Validation Failed with " + phonenumber, vex.Message, "doLoginValidation");
-                return new { error = 1, message = "Login Validation Failed"};
-            }
-            catch(Exception ex) {
                 Globalfunction.WriteSystemLog("dologinValidation: " + ex.Message);
-                _repository.EventLog.AddEventLog(EventLogTypes.Error, "Login Fail : " + phonenumber, ex.Message, "Login");
-                return new { error = 1, message = "Login Fail"};
+                await _repository.EventLog.Error("Login Fail with PhNo: " + phonenumber, ex.Message, "TokenProviderMiddleware >> doLoginValidation");
+                return new { error = 1, message = "Login Failed"};
             }
         }
 
-        public async Task ResponseMessage(dynamic data, HttpContext context, int code = 400)
+        public async Task ResponseMessage(object data, HttpContext context, int code = StatusCodes.Status400BadRequest)
         {
-            var response = new
-            {
-                status = data.status,
-                message = data.message
-            };
             context.Response.StatusCode = code;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonConvert.SerializeObject(response, _serializerSettings));
+            await context.Response.WriteAsync(JsonConvert.SerializeObject(data, _serializerSettings));
         }
     }
 }

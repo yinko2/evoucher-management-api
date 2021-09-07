@@ -12,17 +12,23 @@ namespace eVoucherAPI.Models
         [Key]
         [Column("id", TypeName = "int(11)")]
         public int Id { get; set; }
+
         [Column("log_type", TypeName = "int(11)")]
         public EventLogTypes LogType { get; set; }
+
         [Column("log_date_time", TypeName = "datetime")]
         public DateTime? LogDateTime { get; set; }
+
         [Column("source")]
         [StringLength(50)]
         public string Source { get; set; }
+
         [Column("log_message", TypeName = "text")]
         public string LogMessage { get; set; }
+
         [Column("error_message", TypeName = "text")]
         public string ErrorMessage { get; set; }
+        
         [Column("user_id", TypeName = "int(11)")]
         public int? UserId { get; set; }
     }

@@ -11,9 +11,11 @@ namespace eVoucherAPI.Models
         [Key]
         [Column("id", TypeName = "int(11)")]
         public int Id { get; set; }
+
         [Column("payment_name")]
         [StringLength(20)]
         public string PaymentName { get; set; }
+        
         [Column("discount")]
         public double Discount { get; set; }
     }
